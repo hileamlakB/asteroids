@@ -3,6 +3,7 @@ import { useGameLoop } from '../hooks/useGameLoop';
 import { Ship, Asteroid, Bullet, Point, GameState } from '../types/game';
 import { createAsteroid, createShip, drawGame, handleCollisions, updateGameObjects } from '../utils/gameUtils';
 import { Heart } from 'lucide-react';
+import hileaImg from '../assets/hilea.jpeg';
 
 const INITIAL_ASTEROIDS = 5;
 const INITIAL_LIVES = 3;
@@ -12,6 +13,8 @@ const ROTATION_SPEED = 0.1;
 
 export function Game() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const shipImageRef = useRef<HTMLImageElement | null>(null);
+  
   const [gameState, setGameState] = useState<GameState>({
     ship: createShip(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2),
     asteroids: Array.from({ length: INITIAL_ASTEROIDS }, () => 
@@ -26,6 +29,13 @@ export function Game() {
   const keysRef = useRef<Set<string>>(new Set());
   const [canShoot, setCanShoot] = useState(true);
   const lastUpdateTimeRef = useRef<number>(Date.now());
+  
+  // Initialize ship image
+  useEffect(() => {
+    const img = new Image();
+    img.src = hileaImg;
+    shipImageRef.current = img;
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -117,7 +127,7 @@ export function Game() {
 
       // Draw
       ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-      drawGame(ctx, finalState);
+      drawGame(ctx, finalState, shipImageRef.current);
 
       return finalState;
     });

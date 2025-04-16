@@ -177,30 +177,41 @@ export function handleCollisions(state: GameState): GameState {
   };
 }
 
-export function drawGame(ctx: CanvasRenderingContext2D, state: GameState) {
+export function drawGame(ctx: CanvasRenderingContext2D, state: GameState, shipImage?: HTMLImageElement | null) {
   const { ship, asteroids, bullets } = state;
 
   // Draw ship
   ctx.save();
   ctx.translate(ship.position.x, ship.position.y);
   ctx.rotate(ship.rotation);
-  ctx.strokeStyle = 'white';
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.moveTo(20, 0);
-  ctx.lineTo(-10, 10);
-  ctx.lineTo(-10, -10);
-  ctx.closePath();
-  ctx.stroke();
-
-  // Draw thrust
-  if (ship.thrusting) {
+  
+  if (shipImage && shipImage.complete) {
+    // Draw the ship image instead of vector graphics
+    // Center the image on the ship's position
+    const scale = 0.15; // Adjust scale as needed
+    const width = shipImage.width * scale;
+    const height = shipImage.height * scale;
+    ctx.drawImage(shipImage, -width/2, -height/2, width, height);
+  } else {
+    // Fallback to original vector drawing if image isn't loaded
+    ctx.strokeStyle = 'white';
+    ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(-10, 0);
-    ctx.lineTo(-20, 5);
-    ctx.lineTo(-20, -5);
+    ctx.moveTo(20, 0);
+    ctx.lineTo(-10, 10);
+    ctx.lineTo(-10, -10);
     ctx.closePath();
     ctx.stroke();
+
+    // Draw thrust
+    if (ship.thrusting) {
+      ctx.beginPath();
+      ctx.moveTo(-10, 0);
+      ctx.lineTo(-20, 5);
+      ctx.lineTo(-20, -5);
+      ctx.closePath();
+      ctx.stroke();
+    }
   }
   ctx.restore();
 
