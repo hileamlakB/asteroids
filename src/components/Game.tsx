@@ -83,7 +83,7 @@ export function Game() {
   };
 
   useGameLoop(() => {
-    if (!canvasRef.current || gameState.gameOver) return;
+    if (!canvasRef.current) return;
 
     const ctx = canvasRef.current.getContext('2d');
     if (!ctx) return;
@@ -110,8 +110,10 @@ export function Game() {
         ship: newShip
       }, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-      // Check collisions
-      const finalState = handleCollisions(updatedState);
+      // Only check collisions if the game is not over
+      const finalState = prevState.gameOver 
+        ? updatedState 
+        : handleCollisions(updatedState);
 
       // Draw
       ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
