@@ -116,12 +116,15 @@ export function handleCollisions(state: GameState): GameState {
   let gameOver = false;
 
   // Check ship collision with asteroids
-  if (asteroids.some(asteroid => checkCollision(ship, asteroid))) {
-    newLives -= 1;
+  const hasCollision = asteroids.some(asteroid => checkCollision(ship, asteroid));
+  
+  if (hasCollision) {
+    newLives--;
+    
     if (newLives <= 0) {
       gameOver = true;
     } else {
-      // Reset ship position
+      // Reset ship position and give temporary invulnerability
       ship.position = { x: 400, y: 300 };
       ship.velocity = { x: 0, y: 0 };
       ship.rotation = 0;
