@@ -131,11 +131,28 @@ export function handleCollisions(state: GameState): GameState {
     }
   }
 
-  // Check bullet collisions with asteroids
-  const remainingAsteroids = asteroids.filter(asteroid => {
-    const hitByBullet = bullets.some(bullet => checkCollision(bullet, asteroid));
-    if (hitByBullet) newScore += 100;
-    return !hitByBullet;
+  // Track which bullets have hit an asteroid to ensure they don't hit multiple
+  const bulletsToRemove = new Set<number>();
+  const remainingAsteroids = [...asteroids];
+  const remainingAsteroidIndices = asteroids.map((_, index) => index);
+  
+  // Check each bullet against each asteroid
+  bullets.forEach((bullet, bulletIndex) => {
+    if (bulletsToRemove.has(bulletIndex)) return; // Skip bullets that have already hit something
+    
+    for (let i = remainingAsteroidIndices.length - 1; i >= 0; i--) {
+      const asteroidIndex = remainingAsteroidIndices[i];
+      const asteroid = remainingAsteroids[asteroidIndex];
+      
+      if (checkCollision(bullet, asteroid)) {
+        // Bullet hit an asteroid
+        remainingAsteroidIndices.splice(i, 1);
+        remainingAsteroids.splice(asteroidIndex, 1);
+        bulletsToRemove.add(bulletIndex);
+        newScore += 100;
+        break; // Exit the loop so this bullet doesn't hit more asteroids
+      }
+    }
   });
 
   // Create new asteroids if all are destroyed
@@ -143,6 +160,7 @@ export function handleCollisions(state: GameState): GameState {
     return {
       ...state,
       asteroids: Array.from({ length: 5 }, () => createAsteroid(800, 600)),
+      bullets: bullets.filter((_, index) => !bulletsToRemove.has(index)),
       score: newScore,
       lives: newLives,
       gameOver
@@ -152,6 +170,7 @@ export function handleCollisions(state: GameState): GameState {
   return {
     ...state,
     asteroids: remainingAsteroids,
+    bullets: bullets.filter((_, index) => !bulletsToRemove.has(index)),
     score: newScore,
     lives: newLives,
     gameOver
